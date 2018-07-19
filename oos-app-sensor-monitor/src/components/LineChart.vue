@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import Chart from 'chart.js'
+import Chart from 'chart.js/dist/Chart.js'
 
 export default {
   name: 'LineChart',
