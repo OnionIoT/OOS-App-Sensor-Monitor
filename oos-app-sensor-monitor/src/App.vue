@@ -1,24 +1,8 @@
 <template>
   <div id="app">
 
-    <ul class="tab tab-block">
-      <li class="tab-item active">
-        <a href="#">Music</a>
-      </li>
-      <li class="tab-item">
-        <a href="#" class="active">Playlists</a>
-      </li>
-      <li class="tab-item">
-        <a href="#">Radio</a>
-      </li>
-      <li class="tab-item">
-        <a href="#">Connect</a>
-      </li>
-    </ul>
-
-
     <div class="data-chart">
-
+      <LineChart></LineChart>
     </div>
 
   </div>
@@ -44,11 +28,11 @@ export default {
 <style>
 html, body {
     height: 100% !important;
-    height: 100%;
 }
 body {
   margin: 0;
   padding: 0;
   background-color: white;
+  box-sizing: border-box;
 }
 </style>
