@@ -1,11 +1,25 @@
 <template>
-  <div class="line-chart__container">
-    <div class="switch__container">
-      <span class="switcher__text">{{ switcher }}</span>
-      <input type="checkbox" id="switcher" class="switcher__checkbox" v-model="switcher" true-value="0x49" false-value="0x48">
-      <label for="switcher" class="switcher__label" @click="switcherAction">
-        <div class="switcher__label--round"></div>
-      </label>
+  <div class="line-chart__container" v-cloak>
+    <div class="container">
+      <div class="columns">
+      <div class="col-3 col-mr-auto  size__container">
+        <p class="size__text">Select range
+        <select name="size" id="chartSize" v-model="chartSize" class="form-select" @change="filterSize">
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="30">30</option>
+        </select>
+        </p>
+      </div>
+      <div class="col-4 col-ml-auto switch__container">
+        <div class="switcher__text">{{ switcher }}
+        <input type="checkbox" id="switcher" class="switcher__checkbox" v-model="switcher" true-value="0x49" false-value="0x48">
+        <label for="switcher" class="switcher__label" @click="switcherAction">
+          <div class="switcher__label--round"></div>
+        </label>
+        </div>
+      </div>
+      </div>
     </div>
     <canvas id="line-chart"></canvas>
     <button class="clear" @click="clearStorage">Clear Cache</button>
@@ -24,6 +38,7 @@ export default {
     return {
       batteryChart: null,
       switcher: '0x48',
+      chartSize: 10,
       chartData: {
         ch0: [],
         ch1: [],
@@ -38,7 +53,7 @@ export default {
       let self = this
 
       let checkerDataFunction = (arr) => {
-        if (arr.length > 9) {
+        if (arr.length > 29) {
           arr.shift()
         }
         arr.push(self.getRandom(5))
@@ -46,29 +61,50 @@ export default {
       }
       let checkerTimerFunction = (arr) => {
         let currentDate = new Date()
-        let currentTime = `${currentDate.getHours()}:${currentDate.getMinutes()}:${currentDate.getSeconds()}`
-        if (arr.length > 9) {
+        let currentHours = `${(currentDate.getHours() <= 9) ? '0' + currentDate.getHours() : currentDate.getHours()}`
+        let currentMinutes = `${(currentDate.getMinutes() <= 9) ? '0' + currentDate.getMinutes() : currentDate.getMinutes()}`
+        let currentSeconds = `${(currentDate.getSeconds() <= 9) ? '0' + currentDate.getSeconds() : currentDate.getSeconds()}`
+
+        let currentTime = `${currentHours}:${currentMinutes}:${currentSeconds}`
+        if (arr.length > 29) {
           arr.shift()
         }
         arr.push(currentTime)
         return arr
       }
+      let zoomFilter = (arr, size) => {
+        return arr.slice(-size)
+      }
 
+      // Store chartData values
       checkerTimerFunction(self.chartData.timer)
       checkerDataFunction(self.chartData.ch0)
       checkerDataFunction(self.chartData.ch1)
       checkerDataFunction(self.chartData.ch2)
       checkerDataFunction(self.chartData.ch3)
 
+      // Filter chartData
+      self.batteryChart.data.labels = zoomFilter(self.chartData.timer, self.chartSize)
+      self.batteryChart.data.datasets[0].data = zoomFilter(self.chartData.ch0, self.chartSize)
+      self.batteryChart.data.datasets[1].data = zoomFilter(self.chartData.ch1, self.chartSize)
+      self.batteryChart.data.datasets[2].data = zoomFilter(self.chartData.ch2, self.chartSize)
+      self.batteryChart.data.datasets[3].data = zoomFilter(self.chartData.ch3, self.chartSize)
+
+      // Save chartData to localStorage
       localStorage.setItem('chartData', JSON.stringify(self.chartData))
     },
     switcherAction () {
       let self = this
-      console.log(self.switcher)
+      setTimeout(function () {
+        localStorage.setItem('switcher', JSON.stringify(self.switcher))
+      }, 10)
     },
     clearStorage () {
       localStorage.clear()
       this.clearChart()
+    },
+    filterSize () {
+      localStorage.setItem('filter', JSON.stringify(this.chartSize))
     },
     getRandom (num) {
       return (Math.random() * num).toFixed(2)
@@ -108,6 +144,9 @@ export default {
         options: {
           legend: {
             display: true
+          },
+          animation: {
+            easing: 'linear'
           },
           scales: {
             xAxes: [{
@@ -151,19 +190,27 @@ export default {
     if (localStorage.getItem('chartData')) {
       self.chartData = JSON.parse(localStorage.getItem('chartData'))
     }
+    if (localStorage.getItem('switcher')) {
+      self.switcher = JSON.parse(localStorage.getItem('switcher'))
+    }
+    if (localStorage.getItem('filter')) {
+      self.chartSize = JSON.parse(localStorage.getItem('filter'))
+    }
 
     self.initChart()
 
     setInterval(function () {
-      console.log(self.chartData)
       self.getData()
-      self.batteryChart.update()
+      self.batteryChart.update(0)
     }, 1000)
   }
 }
 </script>
 
 <style scoped>
+  [v-cloak] {
+    display: none;
+  }
   .line-chart__container {
     margin: 50px auto;
     max-width: 800px;
