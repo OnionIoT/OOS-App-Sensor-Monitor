@@ -145,6 +145,9 @@ export default {
           legend: {
             display: true
           },
+          animation: {
+            easing: 'linear'
+          },
           scales: {
             xAxes: [{
               gridLines: {
@@ -198,7 +201,7 @@ export default {
 
     setInterval(function () {
       self.getData()
-      self.batteryChart.update()
+      self.batteryChart.update(0)
     }, 1000)
   }
 }
