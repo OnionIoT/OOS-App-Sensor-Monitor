@@ -27,6 +27,7 @@
 </template>
 
 <script>
+import OnionCDK from '@/OnionCDK.js'
 import Chart from 'chart.js/dist/Chart.js'
 
 export default {
@@ -50,13 +51,22 @@ export default {
   },
   methods: {
     getData () {
+      // adc-exp -j -s 0x48 all
+      OnionCDK.sendCmd('adc-exp', [
+        '-j',
+        '-s', this.switcher,
+        'all'
+      ])
+    },
+    updateData (ch0, ch1, ch2, ch3) {
       let self = this
 
-      let checkerDataFunction = (arr) => {
+      let checkerDataFunction = (arr, val) => {
+        // TODO: fix this hard-coded array length
         if (arr.length > 29) {
           arr.shift()
         }
-        arr.push(self.getRandom(5))
+        arr.push(val)
         return arr
       }
       let checkerTimerFunction = (arr) => {
@@ -78,10 +88,10 @@ export default {
 
       // Store chartData values
       checkerTimerFunction(self.chartData.timer)
-      checkerDataFunction(self.chartData.ch0)
-      checkerDataFunction(self.chartData.ch1)
-      checkerDataFunction(self.chartData.ch2)
-      checkerDataFunction(self.chartData.ch3)
+      checkerDataFunction(self.chartData.ch0, ch0)
+      checkerDataFunction(self.chartData.ch1, ch1)
+      checkerDataFunction(self.chartData.ch2, ch2)
+      checkerDataFunction(self.chartData.ch3, ch3)
 
       // Filter chartData
       self.batteryChart.data.labels = zoomFilter(self.chartData.timer, self.chartSize)
@@ -92,6 +102,9 @@ export default {
 
       // Save chartData to localStorage
       localStorage.setItem('chartData', JSON.stringify(self.chartData))
+
+      // update the chart
+      self.batteryChart.update(0)
     },
     switcherAction () {
       let self = this
@@ -197,12 +210,32 @@ export default {
       self.chartSize = JSON.parse(localStorage.getItem('filter'))
     }
 
+    // initialize the chart
     self.initChart()
 
-    setInterval(function () {
-      self.getData()
-      self.batteryChart.update(0)
-    }, 1000)
+    // OnionCDK setup
+    OnionCDK.onInit = function () {
+      console.log('OnionCDK Initialzied')
+
+      // fetch data once a second
+      setInterval(function () {
+        self.getData()
+      }, 1000)
+    }
+    OnionCDK.init()
+
+    OnionCDK.onCmd = function (cmd, response) {
+      if (cmd === 'adc-exp') {
+        var values = JSON.parse(response)
+        console.log(`${cmd} response!`)
+        self.updateData(
+          values['A0'],
+          values['A1'],
+          values['A2'],
+          values['A3']
+        )
+      }
+    }.bind(self)
   }
 }
 </script>
