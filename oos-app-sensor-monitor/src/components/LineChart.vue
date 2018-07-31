@@ -179,6 +179,11 @@ export default {
               scaleLabel: {
                 display: true,
                 labelString: 'Voltage'
+              },
+              ticks: {
+                beginAtZero: true,
+                suggestedMin: 0,
+                suggestedMax: 5
               }
             }] // yAxes
           } // scales
