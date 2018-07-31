@@ -227,7 +227,6 @@ export default {
     OnionCDK.onCmd = function (cmd, response) {
       if (cmd === 'adc-exp') {
         var values = JSON.parse(response)
-        console.log(`${cmd} response!`)
         self.updateData(
           values['A0'],
           values['A1'],

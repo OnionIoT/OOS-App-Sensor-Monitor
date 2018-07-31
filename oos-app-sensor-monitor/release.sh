@@ -5,7 +5,8 @@
 rm -rf dist/
 npm run build
 
-git rm ../omega/www/static/*
+git rm ../omega/www/static/css/*
+git rm ../omega/www/static/js/*
 
 cp dist/index.html ../omega/www/
 cp -r dist/static/ ../omega/www/static/
