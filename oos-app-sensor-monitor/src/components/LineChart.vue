@@ -23,6 +23,7 @@
     </div>
     <canvas id="line-chart"></canvas>
     <button class="clear" @click="clearStorage">Clear Cache</button>
+    <div>Connect the <a href="https://onion.io/store/adc-expansion/">ADC Expansion</a> to your Omega and capture samples from all four channels in real time!</div>
   </div>
 </template>
 
